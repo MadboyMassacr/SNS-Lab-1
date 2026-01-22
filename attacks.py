@@ -1,5 +1,4 @@
 """
-Attack Simulation Script for Phase 4
 
 This script simulates various attacks against the secure protocol to demonstrate
 that the implementation successfully detects and mitigates security threats.
@@ -164,7 +163,7 @@ class AttackSimulator:
         captured = self.capture_valid_packet("Original legitimate message")
         
         # Now try to replay the captured packet (which has old round number)
-        print("[Attacker] 🚨 LAUNCHING REPLAY ATTACK 🚨")
+        print("[Attacker] LAUNCHING REPLAY ATTACK ")
         print(f"[Attacker] Replaying captured packet with old round number...")
         
         try:
@@ -176,13 +175,13 @@ class AttackSimulator:
                 # Try to process - should fail due to round mismatch
                 try:
                     result = self.session.process_incoming(response)
-                    print(f"[Attacker] ❌ ATTACK FAILED: Server accepted replayed packet!")
+                    print(f"[Attacker]  ATTACK SUCCESSFUL: Server accepted replayed packet!")
                 except Exception as e:
-                    print(f"[Attacker] ✅ DEFENSE SUCCESSFUL: {e}")
+                    print(f"[Attacker] DEFENSE SUCCESSFUL: {e}")
             else:
-                print(f"[Attacker] ✅ DEFENSE SUCCESSFUL: Server rejected packet (connection closed)")
+                print(f"[Attacker]  DEFENSE SUCCESSFUL: Server rejected packet (connection closed)")
         except Exception as e:
-            print(f"[Attacker] ✅ DEFENSE SUCCESSFUL: {e}")
+            print(f"[Attacker]  DEFENSE SUCCESSFUL: {e}")
         
         self.disconnect()
     
@@ -221,7 +220,7 @@ class AttackSimulator:
         modified_msg[flip_position] ^= 0x01  # Flip the least significant bit
         modified_msg = bytes(modified_msg)
         
-        print(f"[Attacker] 🚨 LAUNCHING BIT-FLIPPING ATTACK 🚨")
+        print(f"[Attacker]  LAUNCHING BIT-FLIPPING ATTACK ")
         print(f"[Attacker] Flipped bit at position {flip_position} in ciphertext")
         print(f"[Attacker] Original byte: 0x{msg[flip_position]:02x}, Modified: 0x{modified_msg[flip_position]:02x}")
         
@@ -231,11 +230,11 @@ class AttackSimulator:
             # Try to receive response (should be rejected)
             response = self.receive_message()
             if response:
-                print(f"[Attacker] ❌ ATTACK FAILED: Server accepted tampered packet!")
+                print(f"[Attacker]  ATTACK SUCCESSFUL: Server accepted tampered packet!")
             else:
-                print(f"[Attacker] ✅ DEFENSE SUCCESSFUL: Server rejected tampered packet (HMAC verification failed)")
+                print(f"[Attacker]  DEFENSE SUCCESSFUL: Server rejected tampered packet (HMAC verification failed)")
         except Exception as e:
-            print(f"[Attacker] ✅ DEFENSE SUCCESSFUL: {e}")
+            print(f"[Attacker]  DEFENSE SUCCESSFUL: {e}")
         
         self.disconnect()
     
@@ -262,7 +261,7 @@ class AttackSimulator:
         print(f"[Attacker] Current round: {self.session.round}")
         
         # Manually create a packet with a future round number
-        print(f"[Attacker] 🚨 LAUNCHING REORDERING ATTACK 🚨")
+        print(f"[Attacker]  LAUNCHING REORDERING ATTACK ")
         print(f"[Attacker] Crafting packet for Round 5 (skipping rounds 0-4)...")
         
         # Save original round
@@ -282,11 +281,11 @@ class AttackSimulator:
             # Try to receive response
             response = self.receive_message()
             if response:
-                print(f"[Attacker] ❌ ATTACK FAILED: Server accepted out-of-order packet!")
+                print(f"[Attacker]  ATTACK SUCCESSFUL: Server accepted out-of-order packet!")
             else:
-                print(f"[Attacker] ✅ DEFENSE SUCCESSFUL: Server rejected out-of-order packet (FSM terminated session)")
+                print(f"[Attacker]  DEFENSE SUCCESSFUL: Server rejected out-of-order packet (FSM terminated session)")
         except Exception as e:
-            print(f"[Attacker] ✅ DEFENSE SUCCESSFUL: {e}")
+            print(f"[Attacker]  DEFENSE SUCCESSFUL: {e}")
         
         self.disconnect()
     
@@ -318,7 +317,7 @@ class AttackSimulator:
         
         # Receive server response BUT don't process it (simulating interception)
         response = self.receive_message()
-        print(f"[Attacker] 🚨 LAUNCHING KEY DESYNC ATTACK 🚨")
+        print(f"[Attacker]  LAUNCHING KEY DESYNC ATTACK ")
         print(f"[Attacker] Intercepted server response - NOT processing it!")
         print(f"[Attacker] Server has evolved its keys, but client keys remain old\n")
         
@@ -337,31 +336,19 @@ class AttackSimulator:
             if response2:
                 try:
                     result = self.session.process_incoming(response2)
-                    print(f"[Attacker] ❌ ATTACK FAILED: Server accepted message with desynced keys!")
+                    print(f"[Attacker] ATTACK SUCCESSFUL: Server accepted message with desynced keys!")
                 except Exception as e:
-                    print(f"[Attacker] ✅ DEFENSE SUCCESSFUL: {e}")
+                    print(f"[Attacker] DEFENSE SUCCESSFUL: {e}")
             else:
-                print(f"[Attacker] ✅ DEFENSE SUCCESSFUL: Server rejected message (HMAC failed due to key desync)")
+                print(f"[Attacker] DEFENSE SUCCESSFUL: Server rejected message (HMAC failed due to key desync)")
         except Exception as e:
-            print(f"[Attacker] ✅ DEFENSE SUCCESSFUL: {e}")
+            print(f"[Attacker] DEFENSE SUCCESSFUL: {e}")
         
         self.disconnect()
 
 
 def main():
     """Run all attack scenarios"""
-    print("\n")
-    print("╔" + "═" * 68 + "╗")
-    print("║" + " " * 15 + "PHASE 4: ATTACK SIMULATION SUITE" + " " * 21 + "║")
-    print("╚" + "═" * 68 + "╝")
-    print("\nThis script demonstrates that the protocol successfully defends against:")
-    print("  1. Replay Attacks")
-    print("  2. Integrity/Bit-Flipping Attacks")
-    print("  3. Message Reordering Attacks")
-    print("  4. Key Desynchronization Attacks")
-    print("\n" + "=" * 70)
-    print("NOTE: Server must be running before executing attacks!")
-    print("=" * 70 + "\n")
     
     # Use Client ID 1 for all attacks
     client_id = 1
@@ -387,13 +374,6 @@ def main():
         print("\n" + "=" * 70)
         print("ATTACK SIMULATION COMPLETE")
         print("=" * 70)
-        print("✅ All attacks were successfully detected and mitigated!")
-        print("✅ The protocol demonstrates robust security properties:")
-        print("   - Sequential round numbers prevent replay")
-        print("   - Encrypt-then-MAC detects tampering")
-        print("   - FSM enforces message ordering")
-        print("   - Key evolution detects desynchronization")
-        print("=" * 70 + "\n")
         
     except KeyboardInterrupt:
         print("\n\n[Attacker] Simulation interrupted by user")
