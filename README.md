@@ -277,11 +277,74 @@ python -m pytest test_protocol_fsm.py -v
 -  Key ratcheting for forward secrecy
 -  Pre-shared keys from secure storage
 
+## Phase 4: Attack Simulation
+
+### Running Attack Simulations
+
+The `attacks.py` script demonstrates that the protocol successfully defends against common security threats.
+
+**Prerequisites:**
+1. Server must be running: `python server.py`
+2. Run the attack simulator: `python attacks.py`
+
+**Simulated Attacks:**
+
+#### 1. Replay Attack
+```
+Threat: Adversary captures and replays a valid encrypted packet
+Defense: Sequential round numbers in FSM reject old packets
+Result: ✅ Server rejects replayed packet (round mismatch)
+```
+
+#### 2. Integrity/Bit-Flipping Attack
+```
+Threat: Adversary modifies ciphertext bits to alter message
+Defense: Encrypt-then-MAC with HMAC-SHA256 detects tampering
+Result: ✅ Server rejects tampered packet (HMAC verification fails)
+```
+
+#### 3. Message Reordering Attack
+```
+Threat: Adversary sends Round 2 data before Round 1
+Defense: FSM enforces strict sequential round numbers
+Result: ✅ Server terminates session (out-of-order round detected)
+```
+
+#### 4. Key Desynchronization Attack
+```
+Threat: Block server response to cause key state mismatch
+Defense: Key ratcheting causes HMAC failure on desynced keys
+Result: ✅ Server rejects message (HMAC fails with evolved keys)
+```
+
+**Expected Output:**
+```
+╔════════════════════════════════════════════════════════════════════╗
+║               PHASE 4: ATTACK SIMULATION SUITE                     ║
+╚════════════════════════════════════════════════════════════════════╝
+
+[Attacker] Initialized with Client ID 1
+...
+✅ All attacks were successfully detected and mitigated!
+```
+
+### Security Properties Verified
+
+| Property | Mechanism | Attack Mitigated |
+|----------|-----------|------------------|
+| **Authenticity** | HMAC-SHA256 | Bit-flipping, Forgery |
+| **Confidentiality** | AES-128-CBC | Eavesdropping |
+| **Integrity** | Encrypt-then-MAC | Tampering detection before decryption |
+| **Freshness** | Sequential rounds | Replay attacks |
+| **Ordering** | FSM state enforcement | Message reordering |
+| **Forward Secrecy** | Key ratcheting | Key compromise mitigation |
+
 ## Team Contributions
 
 - **Phase 1** (crypto_utils.py): Cryptographic primitives
 - **Phase 2** (protocol_fsm.py): Protocol state machine
 - **Phase 3** (server.py, client.py): Network implementation
+- **Phase 4** (attacks.py): Attack simulation and security verification
 
 ## Notes
 
